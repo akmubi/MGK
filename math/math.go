@@ -27,15 +27,12 @@ func check(e error) {
 	}
 }
 
-//
-// ФУНКЦИИ И МЕТОДЫ МАТРИЦ
-//
-
 // Инициализация матрицы
 func InitMatrix() Matrix {
 	return Matrix{ Array: nil, Row_count: 0, Column_count: 0 }
 }
 
+// Инициализация вектора
 func InitVector() Vector {
 	return Vector{ Array: nil, Size: 0 }
 }
@@ -55,6 +52,7 @@ func (mat *Matrix) New(row_count, column_count int) {
 	mat.Column_count = column_count
 }
 
+// Единичная матрица
 func Identity(mat_size int) Matrix {
 	mat := InitMatrix()
 	mat.New(mat_size, mat_size)
@@ -68,13 +66,15 @@ func Identity(mat_size int) Matrix {
 	return mat
 }
 
-// Проверить то, что матрица квадратная
+// Проверить матрицу на "квадратность"
+// Если матрица не квадратная, то выдать ошибку
 func (mat Matrix) checkSquareness() {
 	if mat.Column_count != mat.Row_count {
 		check(errors.New("Матрица должна быть квадратной!"))
 	} 
 }
 
+// Проверка симметричности матрицы
 func (mat Matrix) IsSimmetric() bool {
 	mat.checkSquareness()
 	for i := 0; i < mat.Row_count - 1; i++ {
@@ -87,6 +87,8 @@ func (mat Matrix) IsSimmetric() bool {
 	return true
 }
 
+// Проверить симметричность матрицы
+// Если матрица не симметрична, то выдать ошибку
 func (mat Matrix) checkSimmetry() {
 	if !mat.IsSimmetric() {
 		check(errors.New("Матрица не симметрична"))
@@ -175,6 +177,7 @@ func (mat *Matrix) Transpose() {
 	mat.Column_count = new_column_count
 }
 
+// Умножение матриц
 func (first *Matrix) Mul(second Matrix) {
 	
 	if first.Row_count != second.Column_count {
@@ -200,6 +203,7 @@ func (first *Matrix) Mul(second Matrix) {
 	first = &result
 }
 
+// Средние значения столбцов матрицы
 func (mat Matrix) GetAverages() Vector {
 	// Создаём вектор средних значений столбцов
 	averages := InitVector()
@@ -215,6 +219,7 @@ func (mat Matrix) GetAverages() Vector {
 	return averages
 }
 
+// Дисперсии столбцов матрицы
 func (mat Matrix) GetDispersions() Vector {
 	// Создаём вектор дисперсий
 	dispersions := InitVector()
@@ -261,6 +266,10 @@ func (mat Matrix) MakeCovariation() Matrix {
 	}
 	return result
 }
+
+//
+// МЕТОД ЯКОБИ С ПРЕГРАДАМИ ПО НАХОЖДЕНИЮ СОБСТВЕННЫХ ЗНАЧЕНИЙ И СОБСТВЕННЫХ ВЕКТОРОВ 
+//
 
 // Шаг 1
 func (mat_A Matrix) JacobiProcedure(eps float64) (Matrix, Matrix) {
