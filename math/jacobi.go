@@ -23,18 +23,18 @@ func (mat_A Matrix) JacobiProcedure(eps float64) (Matrix, Matrix) {
 		// Находим элемент по модулю больший преграды
 		p, q, err := mat_A.findGreaterThanBarrier(ak)
 		if err != nil {
-			continue
+			panic(err)
 		}
-		// Находим синус и косинус
-		sin, cos := mat_A.calculateSinAndCos(p, q)
-		// Находим матрицу следующую A[k]
-		mat_A.calculateNextMatrix(p, q, sin, cos)
-		for i := range mat_T.Array {
-			z3 := mat_T.Array[i][p]
-			z4 := mat_T.Array[i][q]
-			mat_T.Array[i][q] = z3 * sin + z4 * cos
-			mat_T.Array[i][p] = z3 * cos - z4 * sin
-		}
+			// Находим синус и косинус
+			sin, cos := mat_A.calculateSinAndCos(p, q)
+			// Находим следующую матрицу A[k]
+			mat_A.calculateNextMatrix(p, q, sin, cos)
+			for i := range mat_T.Array {
+				z3 := mat_T.Array[i][p]
+				z4 := mat_T.Array[i][q]
+				mat_T.Array[i][q] = z3 * sin + z4 * cos
+				mat_T.Array[i][p] = z3 * cos - z4 * sin
+			}
 	}
 	return mat_A, mat_T
 }
@@ -43,8 +43,8 @@ func (mat_A Matrix) JacobiProcedure(eps float64) (Matrix, Matrix) {
 func (mat Matrix) calculateBarrier() float64 {
 	barrier := 0.0
 	// Cуммируем внедиагональные элементы матрицы
-	for j := 1; j < mat.Column_count; j++ {
-		for i := 0; i < j; i++ {
+	for i := 0; i < mat.Row_count - 1; i++ {
+		for j := i + 1; j < mat.Column_count; j++ {
 			barrier += mat.Array[i][j] * mat.Array[i][j]
 		}
 	}
@@ -55,14 +55,23 @@ func (mat Matrix) calculateBarrier() float64 {
 // Функция возвращает номер строки и номер столбца найденного элемента, если 
 // поиск дал результаты, и выдаёт ошибку в противном случае
 func (mat Matrix) findGreaterThanBarrier(barrier float64) (int, int, error) {
-	for j := 1; j < mat.Column_count; j++ {
-		for i := 0; i < j; j++ {
-			if math.Abs(mat.Array[i][j]) > barrier {
-				return i, j, nil
+	max := barrier
+	p, q := -1, -1
+	var err error = nil
+	for i := 0; i < mat.Row_count - 1; i++ {
+		for j := i + 1; j < mat.Column_count; j++ {
+			absolute_val := math.Abs(mat.Array[i][j])
+			if absolute_val > max {
+				max = absolute_val
+				p, q = i, j
 			}
 		}
 	}
-	return -1, -1, errors.New("Не удалось найти наибольший по модулю вне диагональный элемент, превосходящий преграду")
+	if p == -1 && q == -1 {
+		fmt.Println("(p, q) = (", p, ",", q, ")")
+		err = errors.New("Не найден элемент больший текущей преграды")
+	}
+	return p, q, err
 }
 
 // Шаг 4
