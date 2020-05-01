@@ -201,3 +201,25 @@ func (first *Matrix) Mul(second Matrix) {
 	}
 	first = &result
 }
+
+// Преобразование столбцов матрицы в векторы
+func (mat Matrix) ConvertToVec() (vectors []Vector) {
+	vectors = make([]Vector, mat.Column_count)
+	for i := range mat.Array {
+		vectors[i].New(mat.Row_count)
+		for j := range mat.Array[i] {
+			vectors[i].Array[j] = mat.Array[j][i]
+		} 
+	}
+	return
+}
+
+// Главная диагональ матрицы
+func (mat Matrix) GetDiagonal() (diagonal []float64) {
+	mat.checkSquareness()
+	diagonal = make([]float64, mat.Column_count)
+	for i := range mat.Array {
+		diagonal[i] = mat.Array[i][i]
+	}
+	return
+}

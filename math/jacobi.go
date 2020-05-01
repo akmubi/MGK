@@ -22,19 +22,17 @@ func (mat_A Matrix) JacobiProcedure(eps float64) (Matrix, Matrix) {
 	for ak := a0; !mat_A.checkAllElementsLessThanEpsBarrier(eps, a0); ak /= float64(mat_A.Row_count * mat_A.Row_count) {
 		// Находим элемент по модулю больший преграды
 		p, q, err := mat_A.findGreaterThanBarrier(ak)
-		if err != nil {
-			panic(err)
+		check(err)
+		// Находим синус и косинус
+		sin, cos := mat_A.calculateSinAndCos(p, q)
+		// Находим следующую матрицу A[k]
+		mat_A.calculateNextMatrix(p, q, sin, cos)
+		for i := range mat_T.Array {
+			z3 := mat_T.Array[i][p]
+			z4 := mat_T.Array[i][q]
+			mat_T.Array[i][q] = z3 * sin + z4 * cos
+			mat_T.Array[i][p] = z3 * cos - z4 * sin
 		}
-			// Находим синус и косинус
-			sin, cos := mat_A.calculateSinAndCos(p, q)
-			// Находим следующую матрицу A[k]
-			mat_A.calculateNextMatrix(p, q, sin, cos)
-			for i := range mat_T.Array {
-				z3 := mat_T.Array[i][p]
-				z4 := mat_T.Array[i][q]
-				mat_T.Array[i][q] = z3 * sin + z4 * cos
-				mat_T.Array[i][p] = z3 * cos - z4 * sin
-			}
 	}
 	return mat_A, mat_T
 }
@@ -58,9 +56,12 @@ func (mat Matrix) findGreaterThanBarrier(barrier float64) (int, int, error) {
 	max := barrier
 	p, q := -1, -1
 	var err error = nil
-	for i := 0; i < mat.Row_count - 1; i++ {
-		for j := i + 1; j < mat.Column_count; j++ {
-			absolute_val := math.Abs(mat.Array[i][j])
+	for i := range mat.Array {
+		for j, value := range mat.Array[i] {
+			if i == j {
+				continue
+			}
+			absolute_val := math.Abs(value)
 			if absolute_val > max {
 				max = absolute_val
 				p, q = i, j
@@ -131,4 +132,25 @@ func (mat Matrix) checkAllElementsLessThanEpsBarrier(eps, barrier float64) bool 
 		}
 	}
 	return true
+}
+
+
+// Сортировка собственных значений и собственных векторов по убыванию
+func SortEigenMatrices(A, T Matrix) ([]float64, []Vector) {
+	A.checkSimmetry()
+	T.checkSquareness()
+
+	eigenvalues := A.GetDiagonal()
+	eigenvectors := T.ConvertToVec()
+
+	for step := len(eigenvalues) / 2; step > 0; step /= 2 {
+		for i := step; i < len(eigenvalues); i++ {
+			for j := i - step; j >= 0 && eigenvalues[j] < eigenvalues[j + step]; j-= step {
+				temp_val, temp_vec := eigenvalues[j], eigenvectors[j]
+				eigenvalues[j], eigenvectors[j] = eigenvalues[j + step], eigenvectors[j + step]
+				eigenvalues[j + step] , eigenvectors[j + step] = temp_val, temp_vec
+			}
+		}
+	}
+	return eigenvalues, eigenvectors
 }
