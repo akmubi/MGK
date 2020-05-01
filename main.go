@@ -1,18 +1,81 @@
 package main
 
 import "./math"
+import stdio "fmt"
 
 const eps = 10e-5
 
 func main() {
+	// Исходная матрица
 	mat := math.InitMatrix()
 	mat.Read("check.txt")
+	stdio.Println("Исходная матрица данных:")
 	mat.Write()
-	mat_A, mat_T := mat.JacobiProcedure(eps)
+
+	// Средние значения столбцов
+	avers := mat.GetAverages()
+	stdio.Println("Средние:")
+	avers.Write()
+
+	// Дисперсии столбцов
+	dispers := mat.GetDispersions()
+	stdio.Println("Дисперсии:")
+	dispers.Write()
+
+	// Стандартизирование матрицы
+	mat.Standartize()
+	stdio.Println("Стандартизованная матрица:")
+	mat.Write();
+	disps := mat.GetDispersions()
+	disps.Write()
+
+	// Корреляционная матрица
+	mat_corel := mat.GetCorrelation()
+	stdio.Println("Корреляционная матрица:")
+	mat_corel.Write()
+	
+	// Величина D, показыващая отклонение корреляционной матрицы от единичной
+	d := mat_corel.ExistDifference(mat.Row_count)
+	stdio.Println("D -", d)
+	// stdio.Println("rows -", mat_corel.Row_count)
+	// stdio.Println("columns -", mat_corel.Column_count)
+
+	// Нахождение собственных значений и собственных векторов
+	mat_A, mat_T := mat_corel.JacobiProcedure(eps)
+	stdio.Println("Матрица с собственными значениями:")
 	mat_A.Write()
+	stdio.Println("Матрица с собственными векторами:")
 	mat_T.Write()
-	_, eigenvectors := math.SortEigenMatrices(mat_A, mat_T)
-	for _, vector := range eigenvectors {
+
+	// Сортировка собственных значений и собственных векторов по убыванию
+	eigenvalues, eigenvectors := math.SortEigenMatrices(mat_A, mat_T)
+	stdio.Println("Собственные значения:")
+	eigenvalues.Write()
+	stdio.Println("Собственные векторы:")
+	printVectors(eigenvectors)
+
+	// Проекции объектов на главные компоненты
+	main_components := math.CalculateMainComponents(mat, eigenvectors)
+	printVectors(main_components)
+	stdio.Println("Дисперсии:")
+	stdio.Println("[")
+	for _, v := range main_components {
+		stdio.Println("\t", v.GetDispersion())
+	}
+	stdio.Println("]")
+
+	// Проверка равенства дисперсий
+	equality := math.CheckDispersionEquality(mat.ConvertToVec(), main_components)
+	stdio.Println("is equal? -", equality)
+
+	// Относительная доля разброса 
+	part_size, I := math.CalculateIValue(eigenvalues)
+	stdio.Println("part size -", part_size)
+	stdio.Println("I value -", I)
+}
+
+func printVectors(vecs []math.Vector) {
+	for _, vector := range vecs {
 		vector.Write()
 	}
 }

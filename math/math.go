@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"errors"
+	// "math"
 )
 
 // Структура матрицы
@@ -202,24 +203,61 @@ func (first *Matrix) Mul(second Matrix) {
 	first = &result
 }
 
+func (vec *Vector) MulScalar(scalar float64) {
+	for i := range vec.Array {
+		vec.Array[i] *= scalar
+	}
+}
+
+func (first *Vector) Add(second Vector) {
+	if first.Size != second.Size {
+		check(errors.New("Длины векторов не совпадают!"))
+	}
+
+	for i := range first.Array {
+		first.Array[i] += second.Array[i]
+	}
+}
+
+// func (vec *Vector) Normalize() {
+// 	// Вычисляем длину вектора
+// 	vec_length := 0.0
+// 	for _, v := range vec.Array {
+// 		vec_length += v * v
+// 	}
+// 	vec_length = math.Sqrt(vec_length)
+// 	// Делим каждый элемент на длину вектора
+// 	for i := range vec.Array {
+// 		vec.Array[i] /= vec_length
+// 	}
+// }
+
+func (vec Vector) getSum(first_elements int) (sum float64) {
+	for i := 0; i < first_elements; i++ {
+		sum += vec.Array[i]
+	}
+	return 
+}
+
+
 // Преобразование столбцов матрицы в векторы
 func (mat Matrix) ConvertToVec() (vectors []Vector) {
 	vectors = make([]Vector, mat.Column_count)
-	for i := range mat.Array {
-		vectors[i].New(mat.Row_count)
-		for j := range mat.Array[i] {
-			vectors[i].Array[j] = mat.Array[j][i]
+	for j := 0; j < mat.Column_count; j++ {
+		vectors[j].New(mat.Row_count)
+		for i := 0; i < mat.Row_count; i++ {
+			vectors[j].Array[i] = mat.Array[i][j]
 		} 
 	}
 	return
 }
 
 // Главная диагональ матрицы
-func (mat Matrix) GetDiagonal() (diagonal []float64) {
+func (mat Matrix) GetDiagonal() (diagonal Vector) {
 	mat.checkSquareness()
-	diagonal = make([]float64, mat.Column_count)
+	diagonal.New(mat.Column_count)
 	for i := range mat.Array {
-		diagonal[i] = mat.Array[i][i]
+		diagonal.Array[i] = mat.Array[i][i]
 	}
 	return
 }

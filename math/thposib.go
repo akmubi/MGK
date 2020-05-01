@@ -1,27 +1,41 @@
 package math
 
 import "math"
+import "fmt"
+
+
+func (vec Vector) GetAverage() (average float64) {
+	
+	for _, value := range vec.Array {
+		average += value 
+	}
+	average /= float64(vec.Size)
+	return
+}
+
+func (vec Vector) GetDispersion() (dispersion float64) {
+	average := vec.GetAverage()
+	for _, value := range vec.Array {
+		dispersion += (value - average) * (value - average)
+	}
+	dispersion /= float64(vec.Size)
+	dispersion = math.Sqrt(dispersion)
+	return
+}
 
 // Средние значения столбцов матрицы
-func (mat Matrix) GetAverages() Vector {
-	// Создаём вектор средних значений столбцов
-	averages := InitVector()
-	averages.New(mat.Column_count)
-	// Вычисляем средние по столбцам
-	for j := 0; j < mat.Column_count; j++ {
-		aver := 0.0
-		for i := 0; i < mat.Row_count; i++ {
-			aver += mat.Array[i][j]
-		}
-		averages.Array[j] = aver / float64(mat.Row_count)
-	}
-	return averages
+func (mat Matrix) GetAverages() (averages Vector) {
+	vectors := mat.ConvertToVec()
+	averages.New(len(vectors))
+	for i := range averages.Array {
+		averages.Array[i] = vectors[i].GetAverage()
+	} 
+	return
 }
 
 // Дисперсии столбцов матрицы
-func (mat Matrix) GetDispersions() Vector {
+func (mat Matrix) GetDispersions() (dispersions Vector) {
 	// Создаём вектор дисперсий
-	dispersions := InitVector()
 	dispersions.New(mat.Column_count)
 
 	// Вычисляем средние значения столбцов
@@ -29,13 +43,13 @@ func (mat Matrix) GetDispersions() Vector {
 
 	// Вычисляем дисперсии
 	for j := 0; j < mat.Column_count; j++ {
-		sum := 0.0
 		for i := 0; i < mat.Row_count; i++ {
-			sum += (mat.Array[i][j] - averages.Array[j]) * (mat.Array[i][j] - averages.Array[j]) 
+			dispersions.Array[j] += (mat.Array[i][j] - averages.Array[j]) * (mat.Array[i][j] - averages.Array[j]) 
 		}
-		dispersions.Array[j] = math.Sqrt(sum / float64(mat.Row_count)) 
+		dispersions.Array[j] /= float64(mat.Row_count)
+		dispersions.Array[j] = math.Sqrt(dispersions.Array[j])
 	}
-	return dispersions
+	return
 }
 
 // Выполнить стандартизацию матрицы
@@ -51,9 +65,8 @@ func (mat *Matrix) Standartize() {
 	}
 }
 
-// Вычислить ковариационную матрицу
-func (mat Matrix) GetCovariation() Matrix {
-	result := InitMatrix()
+// Вычислить корреляционную матрицу
+func (mat Matrix) GetCorrelation() (result Matrix) {
 	result.New(mat.Column_count, mat.Column_count)
 
 	for i := 0; i < mat.Column_count; i++ {
@@ -61,7 +74,69 @@ func (mat Matrix) GetCovariation() Matrix {
 			for k := 0; k < mat.Row_count; k++ {
 				result.Array[i][j] += mat.Array[k][i] * mat.Array[k][j]
 			}
+			result.Array[i][j] /= float64(mat.Row_count)
 		}
 	}
-	return result
+	return
+}
+
+// Расчёт проекций объектов на главные компоненты
+func CalculateMainComponents(standartized Matrix, eigenvectors []Vector) (main_components []Vector) {
+	// Преобразуем стандартизованную матрицу в векторы 
+	features := standartized.ConvertToVec() // []Vector
+	// Количество собственных векторов
+	P := len(eigenvectors)
+	// Количество значений признаков
+	N := features[0].Size
+	main_components = make([]Vector, P)
+	for i := range main_components {
+		main_components[i].New(N)
+		for j := range features {
+			features[j].MulScalar(eigenvectors[i].Array[j])
+			main_components[i].Add(features[j])
+		}
+	}
+	return
+}
+
+// Проверка равенства сумм выборочных дисперсий исходных признаков и
+// выборочных дисперсий проекций объектов на главные компоненты
+func CheckDispersionEquality(standartized []Vector, main_components []Vector) bool {
+	var sum_avers1, sum_avers2 float64
+	for i := range standartized {
+		sum_avers1 += standartized[i].GetDispersion()
+	}
+	for i := range main_components {
+		sum_avers2 += main_components[i].GetDispersion()
+	}
+	fmt.Println("sum1:", sum_avers1)
+	fmt.Println("sum2:", sum_avers2)
+	return sum_avers1 == sum_avers2
+}
+
+// Вычисление относительной доли разброса I(p')
+func CalculateIValue(eigenvalues Vector) (int, float64) {
+	var p, next_p int
+	var full_sum float64
+	// Количество собственных значений
+	p = eigenvalues.Size
+	// Сумма всех собственных значений
+	full_sum = eigenvalues.getSum(p)
+
+	// Находим минимальный next_p, при котором I(next_p) > 0.95
+	for next_p = p - 1; eigenvalues.getSum(next_p) / full_sum > 0.95; next_p-- {}
+	// Возвращаем next_p и I(next_p)
+	return next_p + 1, eigenvalues.getSum(next_p + 1) / full_sum
+}
+
+// Проверка корреляционной матрицы на значимое отличие от единичной матрицы
+func (mat Matrix) ExistDifference(N int) (d float64) {
+	mat.checkSquareness()
+	for i := range mat.Array {
+		for _, v := range mat.Array[i] {
+			d += v * v
+		}
+	}
+	d /= float64(N)
+	return
 }

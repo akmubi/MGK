@@ -1,7 +1,6 @@
 package math
 
 import (
-	"fmt"
 	"math"
 	"errors"
 )
@@ -18,7 +17,6 @@ func (mat_A Matrix) JacobiProcedure(eps float64) (Matrix, Matrix) {
 
 	// Вычисляем начальную преграду
 	a0 := mat_A.calculateBarrier()
-	fmt.Println("Начальная преграда -", a0)
 	for ak := a0; !mat_A.checkAllElementsLessThanEpsBarrier(eps, a0); ak /= float64(mat_A.Row_count * mat_A.Row_count) {
 		// Находим элемент по модулю больший преграды
 		p, q, err := mat_A.findGreaterThanBarrier(ak)
@@ -69,7 +67,6 @@ func (mat Matrix) findGreaterThanBarrier(barrier float64) (int, int, error) {
 		}
 	}
 	if p == -1 && q == -1 {
-		fmt.Println("(p, q) = (", p, ",", q, ")")
 		err = errors.New("Не найден элемент больший текущей преграды")
 	}
 	return p, q, err
@@ -136,19 +133,19 @@ func (mat Matrix) checkAllElementsLessThanEpsBarrier(eps, barrier float64) bool 
 
 
 // Сортировка собственных значений и собственных векторов по убыванию
-func SortEigenMatrices(A, T Matrix) ([]float64, []Vector) {
+func SortEigenMatrices(A, T Matrix) (Vector, []Vector) {
 	A.checkSimmetry()
 	T.checkSquareness()
 
 	eigenvalues := A.GetDiagonal()
 	eigenvectors := T.ConvertToVec()
 
-	for step := len(eigenvalues) / 2; step > 0; step /= 2 {
-		for i := step; i < len(eigenvalues); i++ {
-			for j := i - step; j >= 0 && eigenvalues[j] < eigenvalues[j + step]; j-= step {
-				temp_val, temp_vec := eigenvalues[j], eigenvectors[j]
-				eigenvalues[j], eigenvectors[j] = eigenvalues[j + step], eigenvectors[j + step]
-				eigenvalues[j + step] , eigenvectors[j + step] = temp_val, temp_vec
+	for step := eigenvalues.Size / 2; step > 0; step /= 2 {
+		for i := step; i < eigenvalues.Size; i++ {
+			for j := i - step; j >= 0 && eigenvalues.Array[j] < eigenvalues.Array[j + step]; j-= step {
+				temp_val, temp_vec := eigenvalues.Array[j], eigenvectors[j]
+				eigenvalues.Array[j], eigenvectors[j] = eigenvalues.Array[j + step], eigenvectors[j + step]
+				eigenvalues.Array[j + step] , eigenvectors[j + step] = temp_val, temp_vec
 			}
 		}
 	}
