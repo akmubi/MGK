@@ -52,7 +52,7 @@ func (mat *Matrix) Standartize() {
 }
 
 // Вычислить ковариационную матрицу
-func (mat Matrix) MakeCovariation() Matrix {
+func (mat Matrix) GetCovariation() Matrix {
 	result := InitMatrix()
 	result.New(mat.Column_count, mat.Column_count)
 
