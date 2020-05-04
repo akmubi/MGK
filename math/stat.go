@@ -1,11 +1,9 @@
 package math
 
 import "math"
-import "fmt"
-
+// import "fmt"
 
 func (vec Vector) GetAverage() (average float64) {
-	
 	for _, value := range vec.Array {
 		average += value 
 	}
@@ -19,7 +17,7 @@ func (vec Vector) GetDispersion() (dispersion float64) {
 		dispersion += (value - average) * (value - average)
 	}
 	dispersion /= float64(vec.Size)
-	dispersion = math.Sqrt(dispersion)
+	// dispersion = math.Sqrt(dispersion)
 	return
 }
 
@@ -47,7 +45,7 @@ func (mat Matrix) GetDispersions() (dispersions Vector) {
 			dispersions.Array[j] += (mat.Array[i][j] - averages.Array[j]) * (mat.Array[i][j] - averages.Array[j]) 
 		}
 		dispersions.Array[j] /= float64(mat.Row_count)
-		dispersions.Array[j] = math.Sqrt(dispersions.Array[j])
+		// dispersions.Array[j] = math.Sqrt(dispersions.Array[j])
 	}
 	return
 }
@@ -60,7 +58,7 @@ func (mat *Matrix) Standartize() {
 
 	for i := range mat.Array {
 		for j := range mat.Array[i] {
-			mat.Array[i][j] = (mat.Array[i][j] - averages.Array[j]) / dispersions.Array[j]
+			mat.Array[i][j] = (mat.Array[i][j] - averages.Array[j]) /  math.Sqrt(dispersions.Array[j])
 		}
 	}
 }
@@ -82,18 +80,18 @@ func (mat Matrix) GetCorrelation() (result Matrix) {
 
 // Расчёт проекций объектов на главные компоненты
 func CalculateMainComponents(standartized Matrix, eigenvectors []Vector) (main_components []Vector) {
-	// Преобразуем стандартизованную матрицу в векторы 
-	features := standartized.ConvertToVec() // []Vector
-	// Количество собственных векторов
-	P := len(eigenvectors)
+	// Преобразуем стандартизованную матрицу в векторы-признаки
+	samples := standartized.ConvertToVec() // []Vector
+	// Длина собственных векторов
+	P := eigenvectors[0].Size
 	// Количество значений признаков
-	N := features[0].Size
+	N := samples[0].Size
 	main_components = make([]Vector, P)
 	for i := range main_components {
 		main_components[i].New(N)
-		for j := range features {
-			features[j].MulScalar(eigenvectors[i].Array[j])
-			main_components[i].Add(features[j])
+		for j, v := range samples {
+			v.MulScalar(eigenvectors[j].Array[i])
+			main_components[i].Add(v)
 		}
 	}
 	return
@@ -101,17 +99,14 @@ func CalculateMainComponents(standartized Matrix, eigenvectors []Vector) (main_c
 
 // Проверка равенства сумм выборочных дисперсий исходных признаков и
 // выборочных дисперсий проекций объектов на главные компоненты
-func CheckDispersionEquality(standartized []Vector, main_components []Vector) bool {
-	var sum_avers1, sum_avers2 float64
+func CheckDispersionEquality(standartized []Vector, main_components []Vector) (sum_dipers1, sum_dipers2 float64) {
 	for i := range standartized {
-		sum_avers1 += standartized[i].GetDispersion()
+		sum_dipers1 += standartized[i].GetDispersion()
 	}
 	for i := range main_components {
-		sum_avers2 += main_components[i].GetDispersion()
+		sum_dipers2 += main_components[i].GetDispersion()
 	}
-	fmt.Println("sum1:", sum_avers1)
-	fmt.Println("sum2:", sum_avers2)
-	return sum_avers1 == sum_avers2
+	return
 }
 
 // Вычисление относительной доли разброса I(p')

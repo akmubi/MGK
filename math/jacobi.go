@@ -149,5 +149,8 @@ func SortEigenMatrices(A, T Matrix) (Vector, []Vector) {
 			}
 		}
 	}
+	for i := 1; i < len(eigenvectors); i += 2 {
+		eigenvectors[i].MulScalar(-1.0)
+	}
 	return eigenvalues, eigenvectors
 }

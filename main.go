@@ -26,8 +26,12 @@ func main() {
 	mat.Standartize()
 	stdio.Println("Стандартизованная матрица:")
 	mat.Write();
+	stdio.Println("Дисперсии:")
 	disps := mat.GetDispersions()
 	disps.Write()
+	stdio.Println("Средние:")
+	avers = mat.GetAverages()
+	avers.Write()
 
 	// Корреляционная матрица
 	mat_corel := mat.GetCorrelation()
@@ -55,6 +59,7 @@ func main() {
 	printVectors(eigenvectors)
 
 	// Проекции объектов на главные компоненты
+	stdio.Println("Проекции на главные компоненты:")
 	main_components := math.CalculateMainComponents(mat, eigenvectors)
 	printVectors(main_components)
 	stdio.Println("Дисперсии:")
@@ -65,10 +70,10 @@ func main() {
 	stdio.Println("]")
 
 	// Проверка равенства дисперсий
-	equality := math.CheckDispersionEquality(mat.ConvertToVec(), main_components)
-	stdio.Println("is equal? -", equality)
-
-	// Относительная доля разброса 
+	sum1, sum2 := math.CheckDispersionEquality(mat.ConvertToVec(), main_components)
+	stdio.Println("sum1, sum2 =", sum1, sum2)
+	
+	// Относительная доля разброса
 	part_size, I := math.CalculateIValue(eigenvalues)
 	stdio.Println("part size -", part_size)
 	stdio.Println("I value -", I)

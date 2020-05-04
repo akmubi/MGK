@@ -156,7 +156,6 @@ func (vec Vector) Write() {
 
 // Транспонирование матрицы
 func (mat *Matrix) Transpose() {
-	
 	new_row_count := mat.Column_count
 	new_column_count := mat.Row_count
 
@@ -171,7 +170,6 @@ func (mat *Matrix) Transpose() {
 			temp_array[i][j] = mat.Array[j][i]
 		}
 	}
-
 	mat.Array = temp_array
 	mat.Row_count = new_row_count
 	mat.Column_count = new_column_count
@@ -179,18 +177,15 @@ func (mat *Matrix) Transpose() {
 
 // Умножение матриц
 func (first *Matrix) Mul(second Matrix) {
-	
 	if first.Row_count != second.Column_count {
 		check(errors.New("Количество строк первой матрицы и количество столбцов второй матрицы не совпадают!"))
 	}
-
 	// Временная матрица
 	result := InitMatrix()
 	result.Array = make([][]float64, first.Row_count)
 	for i := range result.Array {
 		result.Array[i] = make([]float64, second.Column_count)
 	}
-
 	for i := 0; i < first.Row_count; i++ {
 		for j := 0; j < second.Column_count; j++ {
 			var accum float64
@@ -213,7 +208,6 @@ func (first *Vector) Add(second Vector) {
 	if first.Size != second.Size {
 		check(errors.New("Длины векторов не совпадают!"))
 	}
-
 	for i := range first.Array {
 		first.Array[i] += second.Array[i]
 	}
