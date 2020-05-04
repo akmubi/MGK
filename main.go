@@ -77,6 +77,13 @@ func main() {
 	part_size, I := math.CalculateIValue(eigenvalues)
 	stdio.Println("part size -", part_size)
 	stdio.Println("I value -", I)
+
+	// Ковариационна матрица вычисленных проекций
+	stdio.Println("Ковариационная матрица проекций на главные компоненты:")
+	main_comp_mat := math.ConvertToMat(main_components)
+	covar_main_components := main_comp_mat.GetCovariation()
+	covar_main_components.Write()
+
 }
 
 func printVectors(vecs []math.Vector) {
