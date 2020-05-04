@@ -248,6 +248,20 @@ func (mat Matrix) ConvertToVec() (vectors []Vector) {
 	return
 }
 
+// Преобразование среза векторов в матрицу
+func ConvertToMat(vectors []Vector) (mat Matrix) {
+	// Будем считать, что векторы представляют собой столбцы матрицы
+	columns := len(vectors)
+	rows := vectors[0].Size 
+	mat.New(rows, columns)
+	for i := range mat.Array {
+		for j := range mat.Array[i] {
+			mat.Array[i][j] = vectors[j].Array[i]
+		}
+	}
+	return
+}
+
 // Главная диагональ матрицы
 func (mat Matrix) GetDiagonal() (diagonal Vector) {
 	mat.checkSquareness()
