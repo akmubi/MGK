@@ -198,10 +198,12 @@ func (first *Matrix) Mul(second Matrix) {
 	first = &result
 }
 
-func (vec *Vector) MulScalar(scalar float64) {
-	for i := range vec.Array {
-		vec.Array[i] *= scalar
+func (vec Vector) MulScalar(scalar float64) (result Vector) {
+	result.New(vec.Size)
+	for i := range result.Array {
+		result.Array[i] = vec.Array[i] * scalar
 	}
+	return
 }
 
 func (first *Vector) Add(second Vector) {

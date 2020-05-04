@@ -8,7 +8,7 @@ const eps = 10e-5
 func main() {
 	// Исходная матрица
 	mat := math.InitMatrix()
-	mat.Read("check.txt")
+	mat.Read("data.txt")
 	stdio.Println("Исходная матрица данных:")
 	mat.Write()
 
@@ -72,7 +72,7 @@ func main() {
 	// Проверка равенства дисперсий
 	sum1, sum2 := math.CheckDispersionEquality(mat.ConvertToVec(), main_components)
 	stdio.Println("sum1, sum2 =", sum1, sum2)
-	
+
 	// Относительная доля разброса
 	part_size, I := math.CalculateIValue(eigenvalues)
 	stdio.Println("part size -", part_size)

@@ -90,8 +90,8 @@ func CalculateMainComponents(standartized Matrix, eigenvectors []Vector) (main_c
 	for i := range main_components {
 		main_components[i].New(N)
 		for j, v := range samples {
-			v.MulScalar(eigenvectors[j].Array[i])
-			main_components[i].Add(v)
+			mul := v.MulScalar(eigenvectors[j].Array[i])
+			main_components[i].Add(mul)
 		}
 	}
 	return
