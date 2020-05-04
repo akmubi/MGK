@@ -63,6 +63,22 @@ func (mat *Matrix) Standartize() {
 	}
 }
 
+// Вычислить ковариационную матрицу
+func (mat Matrix) GetCovariation() (result Matrix) {
+	result.New(mat.Column_count, mat.Column_count)
+	// Вычисляем средние по столбцам
+	averages := mat.GetAverages() // Vector
+	for i := 0; i < mat.Column_count; i++ {
+		for j := 0; j < mat.Column_count; j++ {
+			for k := 0; k < mat.Row_count; k++ {
+				result.Array[i][j] += (mat.Array[k][i] - averages.Array[i]) * (mat.Array[k][j] - averages.Array[j])
+			}
+			result.Array[i][j] /= float64(mat.Row_count)
+		}
+	}
+	return
+}
+
 // Вычислить корреляционную матрицу
 func (mat Matrix) GetCorrelation() (result Matrix) {
 	result.New(mat.Column_count, mat.Column_count)
