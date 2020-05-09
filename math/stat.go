@@ -95,9 +95,9 @@ func (mat Matrix) GetCorrelation() (result Matrix) {
 }
 
 // Расчёт проекций объектов на главные компоненты
-func CalculateMainComponents(standartized Matrix, eigenvectors []Vector) (main_components []Vector) {
+func CalculateMainComponents(standardized Matrix, eigenvectors []Vector) (main_components []Vector) {
 	// Преобразуем стандартизованную матрицу в векторы-признаки
-	samples := standartized.ConvertToVec() // []Vector
+	samples := standardized.ConvertToVec() // []Vector
 	// Длина собственных векторов
 	P := eigenvectors[0].Size
 	// Количество значений признаков
@@ -115,9 +115,9 @@ func CalculateMainComponents(standartized Matrix, eigenvectors []Vector) (main_c
 
 // Проверка равенства сумм выборочных дисперсий исходных признаков и
 // выборочных дисперсий проекций объектов на главные компоненты
-func CheckDispersionEquality(standartized []Vector, main_components []Vector) (sum_dipers1, sum_dipers2 float64) {
-	for i := range standartized {
-		sum_dipers1 += standartized[i].GetDispersion()
+func CheckDispersionEquality(standardized []Vector, main_components []Vector) (sum_dipers1, sum_dipers2 float64) {
+	for i := range standardized {
+		sum_dipers1 += standardized[i].GetDispersion()
 	}
 	for i := range main_components {
 		sum_dipers2 += main_components[i].GetDispersion()
@@ -132,12 +132,12 @@ func CalculateIValue(eigenvalues Vector) (int, float64) {
 	// Количество собственных значений
 	p = eigenvalues.Size
 	// Сумма всех собственных значений
-	full_sum = eigenvalues.getSum(p)
+	full_sum = eigenvalues.GetSum(p)
 
 	// Находим минимальный next_p, при котором I(next_p) > 0.95
-	for next_p = p - 1; eigenvalues.getSum(next_p) / full_sum > 0.95; next_p-- {}
+	for next_p = p - 1; eigenvalues.GetSum(next_p) / full_sum > 0.95; next_p-- {}
 	// Возвращаем next_p и I(next_p)
-	return next_p + 1, eigenvalues.getSum(next_p + 1) / full_sum
+	return next_p + 1, eigenvalues.GetSum(next_p + 1) / full_sum
 }
 
 // Проверка корреляционной матрицы на значимое отличие от единичной матрицы
