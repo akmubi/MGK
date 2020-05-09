@@ -56,12 +56,22 @@ func main() {
 	stdio.Println("Собственные значения:")
 	eigenvalues.Write()
 	stdio.Println("Собственные векторы:")
-	printVectors(eigenvectors)
+
+	///
+	mat_eigenvectors := math.ConvertToMat(eigenvectors)
+	mat_eigenvectors.Write()
+	///
+	// printVectors(eigenvectors)
 
 	// Проекции объектов на главные компоненты
 	stdio.Println("Проекции на главные компоненты:")
 	main_components := math.CalculateMainComponents(mat, eigenvectors)
-	printVectors(main_components)
+
+	///
+	mat_mains := math.ConvertToMat(main_components)
+	mat_mains.Write()
+	///
+	// printVectors(main_components)
 	stdio.Println("Дисперсии:")
 	stdio.Println("[")
 	for _, v := range main_components {
@@ -71,19 +81,27 @@ func main() {
 
 	// Проверка равенства дисперсий
 	sum1, sum2 := math.CheckDispersionEquality(mat.ConvertToVec(), main_components)
-	stdio.Println("sum1, sum2 =", sum1, sum2)
+	stdio.Printf("Сумма выборочных дисперсий исходных признаков: sum1 = %.0f\n", sum1)
+	stdio.Printf("Сумма выборочных дисперсий проекций на главные компоненты: sum2 = %.0f\n", sum2)
 
 	// Относительная доля разброса
 	part_size, I := math.CalculateIValue(eigenvalues)
-	stdio.Println("part size -", part_size)
-	stdio.Println("I value -", I)
+	stdio.Println("Число новых признаков: p' =", part_size)
+	stdio.Println("Относительная доля разброса: I(p') =", I)
 
 	// Ковариационна матрица вычисленных проекций
 	stdio.Println("Ковариационная матрица проекций на главные компоненты:")
 	main_comp_mat := math.ConvertToMat(main_components)
 	covar_main_components := main_comp_mat.GetCovariation()
+	// covar_main_components.Standartize()
 	covar_main_components.Write()
+	stdio.Println("Дисперсии проекций на главные компоненты:")
+	main_comp_dispers := covar_main_components.GetDispersions()
+	main_comp_dispers.Write()
 
+	for i := range eigenvalues.Array {
+		stdio.Println("p' =", i + 1, "I(", i + 1, ") =", eigenvalues.GetSum(i + 1) / eigenvalues.Sum()) 
+	}
 }
 
 func printVectors(vecs []math.Vector) {
