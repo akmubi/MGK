@@ -138,7 +138,7 @@ func (mat Matrix) Write() {
 	for i := range mat.Array {
 		fmt.Print("\t[ ")
 		for _, value := range mat.Array[i] {
-			fmt.Print(value, " ")
+			fmt.Printf("%.4f\t", value)
 		}
 		fmt.Println("]")
 	}
@@ -149,7 +149,7 @@ func (mat Matrix) Write() {
 func (vec Vector) Write() {
 	fmt.Println("[")
 	for _, v := range vec.Array {
-		fmt.Println("\t", v)
+		fmt.Printf("\t%.4f\n", v)
 	}
 	fmt.Println("]")
 }
@@ -228,11 +228,18 @@ func (first *Vector) Add(second Vector) {
 // 	}
 // }
 
-func (vec Vector) getSum(first_elements int) (sum float64) {
+func (vec Vector) GetSum(first_elements int) (sum float64) {
 	for i := 0; i < first_elements; i++ {
 		sum += vec.Array[i]
 	}
 	return 
+}
+
+func (vec Vector) Sum() (sum float64) {
+	for _, value := range vec.Array {
+		sum += value 
+	}
+	return
 }
 
 
