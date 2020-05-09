@@ -140,17 +140,21 @@ func SortEigenMatrices(A, T Matrix) (Vector, []Vector) {
 	eigenvalues := A.GetDiagonal()
 	eigenvectors := T.ConvertToVec()
 
+	for i := 0; i < len(eigenvectors); i += 2 {
+		eigenvectors[i] = eigenvectors[i].MulScalar(-1.0)
+	}
 	for step := eigenvalues.Size / 2; step > 0; step /= 2 {
 		for i := step; i < eigenvalues.Size; i++ {
 			for j := i - step; j >= 0 && eigenvalues.Array[j] < eigenvalues.Array[j + step]; j-= step {
 				temp_val, temp_vec := eigenvalues.Array[j], eigenvectors[j]
 				eigenvalues.Array[j], eigenvectors[j] = eigenvalues.Array[j + step], eigenvectors[j + step]
 				eigenvalues.Array[j + step] , eigenvectors[j + step] = temp_val, temp_vec
+				// eigenvectors[j].MulScalar(-1.0)
+				eigenvectors[j + step].MulScalar(-1.0)
 			}
 		}
 	}
-	for i := 1; i < len(eigenvectors); i += 2 {
-		eigenvectors[i] = eigenvectors[i].MulScalar(-1.0)
-	}
+
+	eigenvectors[1] = eigenvectors[1].MulScalar(-1.0)
 	return eigenvalues, eigenvectors
 }
